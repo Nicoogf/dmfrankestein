@@ -26,6 +26,10 @@ const userSchema = new Schema({
     rol:{
         type: String,
         default: "usuario"
+    },
+    caja_ahorro: {
+        type:Number,
+        default: 0
     }
 },{
     timestamps: true

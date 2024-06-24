@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import User from "@/models/user";
 import { ConnectDB } from "@/libs/mongo";
 import bcrypt from "bcryptjs"
+import { createAccesToken } from "@/libs/jwt";
+import { cookies } from 'next/headers'
+
 
 export async function POST(request) {
   // const { dni,
@@ -55,7 +58,7 @@ export async function POST(request) {
   try {
     const { dni, username, email, nombre ,apellido, password, telefono , rol } = await request.json()
 
-    const passwordHash = await bcrypt.hash(password , 12 )
+    const passwordHash = await bcrypt.hash( password , 12 )
 
     const newUser = new User({
       dni,
@@ -67,11 +70,32 @@ export async function POST(request) {
       telefono , rol })
 
     const userSaved = await newUser.save()
-    console.log(userSaved)
-    return NextResponse.json(userSaved)
+    const token = await createAccesToken({id: userSaved._id})
 
+    cookies().set({
+      name: 'token',
+      value: token,
+      httpOnly: true,
+      path: '/',
+    })
+
+    return NextResponse.json(
+     { 
+      id: userSaved._id,
+      dni: userSaved.dni,
+      username: userSaved._username,
+      email: userSaved.email,
+      nombre: userSaved.nombre,
+      apellido : userSaved.apellido,
+      telefono :userSaved.telefono,
+      rol :userSaved.rol,
+      caja_ahorro:  userSaved.caja_ahorro,
+      createdAt: userSaved.createdAt,
+      updatedAt: userSaved.updatedAt
+    }
+    )
   } catch (error) {
-    return NextResponse.json({ message: error.message })
+    return NextResponse.json({ message: error.message },{status:500})
   }
 
 }
