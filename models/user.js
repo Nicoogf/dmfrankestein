@@ -17,8 +17,7 @@ const userSchema = new Schema({
         type:String
     },
     password:{
-        type:String,
-        select : false
+        type:String     
     },
     telefono:{
         type: Number
